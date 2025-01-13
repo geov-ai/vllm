@@ -868,7 +868,7 @@ def init_model_parallel_group(
         group_ranks=group_ranks,
         local_rank=local_rank,
         torch_distributed_backend=backend,
-        use_pynccl=True,
+        use_pynccl=False,
         use_custom_allreduce=use_custom_allreduce,
         use_tpu_communicator=True,
         use_hpu_communicator=True,
