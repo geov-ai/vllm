@@ -816,6 +816,7 @@ class GroupCoordinator:
         return tensor
 
     def destroy(self):
+        raise RuntimeError()
         if self.device_group is not None:
             torch.distributed.destroy_process_group(self.device_group)
             self.device_group = None
@@ -1160,6 +1161,7 @@ def destroy_model_parallel():
 
 
 def destroy_distributed_environment():
+    raise RuntimeError()
     global _WORLD
     if _WORLD:
         _WORLD.destroy()
@@ -1169,6 +1171,7 @@ def destroy_distributed_environment():
 
 
 def cleanup_dist_env_and_memory(shutdown_ray: bool = False):
+    raise RuntimeError()
     destroy_model_parallel()
     destroy_distributed_environment()
     with contextlib.suppress(AssertionError):
