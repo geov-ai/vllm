@@ -869,11 +869,11 @@ def init_model_parallel_group(
         local_rank=local_rank,
         torch_distributed_backend=backend,
         use_pynccl=False,
-        use_custom_allreduce=use_custom_allreduce,
-        use_tpu_communicator=True,
-        use_hpu_communicator=True,
-        use_xpu_communicator=True,
-        use_message_queue_broadcaster=use_message_queue_broadcaster,
+        use_custom_allreduce=False,
+        use_tpu_communicator=False,
+        use_hpu_communicator=False,
+        use_xpu_communicator=False,
+        use_message_queue_broadcaster=False,
         group_name=group_name,
     )
 
