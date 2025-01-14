@@ -418,7 +418,7 @@ class WorkerWrapperBase:
         enable_trace_function_call_for_thread(self.vllm_config)
 
         # see https://github.com/NVIDIA/nccl/issues/1234
-        os.environ['NCCL_CUMEM_ENABLE'] = '0'
+        # os.environ['NCCL_CUMEM_ENABLE'] = '0'
 
         from vllm.plugins import load_general_plugins
         load_general_plugins()

@@ -130,10 +130,10 @@ class Worker(LocalOrDistributedWorkerBase):
             # this behavior.
             # Related issue:
             # https://discuss.pytorch.org/t/cuda-allocation-lifetime-for-inputs-to-distributed-all-reduce/191573
-            os.environ["TORCH_NCCL_AVOID_RECORD_STREAMS"] = "1"
+            # os.environ["TORCH_NCCL_AVOID_RECORD_STREAMS"] = "1"
 
             # This env var set by Ray causes exceptions with graph building.
-            os.environ.pop("NCCL_ASYNC_ERROR_HANDLING", None)
+            # os.environ.pop("NCCL_ASYNC_ERROR_HANDLING", None)
             self.device = torch.device(f"cuda:{self.local_rank}")
             torch.cuda.set_device(self.device)
 
