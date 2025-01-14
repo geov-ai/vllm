@@ -8,7 +8,7 @@ def divide(a, b):
 
 def get_tensor_model_parallel_rank():
     return 0
-    get_kv_transfer_group
+    # get_kv_transfer_group
 
 def get_tensor_model_parallel_world_size():
     return 1
@@ -21,4 +21,7 @@ def tensor_model_parallel_all_gather(x):
     return x
 
 def tensor_model_parallel_all_reduce(x):
+    return x
+
+def tensor_model_parallel_gather(x):
     return x
