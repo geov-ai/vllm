@@ -37,7 +37,7 @@ class UniprocExecutor(Executor):
             distributed_init_method: Optional[str] = None) -> Worker:
         """Return worker init args for a given rank."""
         # see https://github.com/NVIDIA/nccl/issues/1234
-        os.environ['NCCL_CUMEM_ENABLE'] = '0'
+        # os.environ['NCCL_CUMEM_ENABLE'] = '0'
 
         if distributed_init_method is None:
             distributed_init_method = get_distributed_init_method(
