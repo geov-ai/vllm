@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from vllm.distributed import (divide, get_tensor_model_parallel_rank,
-                              get_tensor_model_parallel_world_size)
 from vllm.model_executor.custom_op import CustomOp
 from vllm.model_executor.utils import set_weight_attrs
 from vllm.utils import LazyDict
@@ -231,9 +229,7 @@ class ScaledActivation(nn.Module):
         self.act = act_module
         self.input_is_parallel = input_is_parallel
         if input_is_parallel:
-            tp_size = get_tensor_model_parallel_world_size()
-            intermediate_size_per_partition = divide(intermediate_size,
-                                                     tp_size)
+            intermediate_size_per_partition = intermediate_size
         else:
             intermediate_size_per_partition = intermediate_size
         if params_dtype is None:
@@ -248,7 +244,7 @@ class ScaledActivation(nn.Module):
     def weight_loader(self, param: nn.Parameter, loaded_weight: torch.Tensor):
         param_data = param.data
         if self.input_is_parallel:
-            tp_rank = get_tensor_model_parallel_rank()
+            tp_rank = 0
             shard_size = param_data.shape[0]
             start_idx = tp_rank * shard_size
             loaded_weight = loaded_weight.narrow(0, start_idx, shard_size)

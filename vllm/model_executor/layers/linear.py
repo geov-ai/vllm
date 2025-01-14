@@ -292,14 +292,13 @@ class ColumnParallelLinear(LinearBase):
         self.gather_output = gather_output
 
         # Divide the weight matrix along the last dimension.
-        tp_size = get_tensor_model_parallel_world_size()
         assert self.quant_method is not None
-        self.output_size_per_partition = divide(self.output_size, tp_size)
+        self.output_size_per_partition = self.output_size
         self.output_partition_sizes = [self.output_size_per_partition]
         # If QKV or MergedColumn, use output size of each partition.
         if hasattr(self, "output_sizes"):
             self.output_partition_sizes = [
-                divide(output_size, tp_size)
+                output_size
                 for output_size in self.output_sizes
             ]
 
