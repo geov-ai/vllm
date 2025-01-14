@@ -27,9 +27,6 @@ from vllm.core.scheduler import SchedulerOutputs
 from vllm.forward_context import set_forward_context
 from vllm.inputs import INPUT_REGISTRY, InputRegistry
 from vllm.logger import init_logger
-from vllm.lora.layers import LoRAMapping
-from vllm.lora.request import LoRARequest
-from vllm.lora.worker_manager import LRUCacheWorkerLoRAManager
 from vllm.model_executor import SamplingMetadata, SamplingMetadataCache
 from vllm.model_executor.layers.rotary_embedding import MRotaryEmbedding
 from vllm.model_executor.layers.sampler import SamplerOutput
@@ -88,7 +85,7 @@ class ModelInputForGPU(ModelRunnerInputBase):
     seq_lens: Optional[List[int]] = None
     query_lens: Optional[List[int]] = None
     lora_mapping: Optional["LoRAMapping"] = None
-    lora_requests: Optional[Set[LoRARequest]] = None
+    lora_requests: Optional[Set['LoRARequest']] = None
     attn_metadata: Optional["AttentionMetadata"] = None
     prompt_adapter_mapping: Optional[PromptAdapterMapping] = None
     prompt_adapter_requests: Optional[Set[PromptAdapterRequest]] = None
@@ -238,7 +235,7 @@ class ModelInputForGPUBuilder(ModelRunnerInputBuilderBase[ModelInputForGPU]):
             # LoRA inputs.
             lora_index_mapping: Optional[List[List[int]]] = None,
             lora_prompt_mapping: Optional[List[List[int]]] = None,
-            lora_requests: Optional[Set[LoRARequest]] = None,
+            lora_requests: Optional[Set['LoRARequest']] = None,
 
             # Prompt adapter inputs.
             prompt_adapter_index_mapping: Optional[List[int]] = None,
@@ -1071,7 +1068,7 @@ class GPUModelRunnerBase(ModelRunnerBase[TModelInputForGPU]):
         # Lazy initialization
         self.model: nn.Module  # Set after load_model
         # Set after load_model.
-        self.lora_manager: Optional[LRUCacheWorkerLoRAManager] = None
+        self.lora_manager: Optional['LRUCacheWorkerLoRAManager'] = None
         self.prompt_adapter_manager: LRUCacheWorkerPromptAdapterManager = None
 
         set_cpu_offload_max_bytes(
@@ -1237,8 +1234,8 @@ class GPUModelRunnerBase(ModelRunnerBase[TModelInputForGPU]):
         # that will have unique loras, an therefore the max amount of memory
         # consumption create dummy lora request copies from the lora request
         # passed in, which contains a lora from the lora warmup path.
-        dummy_lora_requests: List[LoRARequest] = []
-        dummy_lora_requests_per_seq: List[LoRARequest] = []
+        dummy_lora_requests: List['LoRARequest'] = []
+        dummy_lora_requests_per_seq: List['LoRARequest'] = []
         if self.lora_config:
             assert self.lora_manager is not None
             with self.lora_manager.dummy_lora_cache():
@@ -1337,13 +1334,13 @@ class GPUModelRunnerBase(ModelRunnerBase[TModelInputForGPU]):
             raise RuntimeError("LoRA is not enabled.")
         self.lora_manager.remove_all_adapters()
 
-    def set_active_loras(self, lora_requests: Set[LoRARequest],
-                         lora_mapping: LoRAMapping) -> None:
+    def set_active_loras(self, lora_requests: Set['LoRARequest'],
+                         lora_mapping: 'LoRAMapping') -> None:
         if not self.lora_manager:
             raise RuntimeError("LoRA is not enabled.")
         self.lora_manager.set_active_adapters(lora_requests, lora_mapping)
 
-    def add_lora(self, lora_request: LoRARequest) -> bool:
+    def add_lora(self, lora_request: 'LoRARequest') -> bool:
         if not self.lora_manager:
             raise RuntimeError("LoRA is not enabled.")
         return self.lora_manager.add_adapter(lora_request)
