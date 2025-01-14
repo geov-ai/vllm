@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
 import torch
 
 from vllm.config import ObservabilityConfig, VllmConfig
-from vllm.distributed import broadcast_tensor_dict, get_pp_group, get_tp_group
+# from vllm.distributed import broadcast_tensor_dict, get_pp_group, get_tp_group
 from vllm.logger import init_logger
 from vllm.lora.request import LoRARequest
 from vllm.model_executor.layers.sampler import SamplerOutput
@@ -244,7 +244,7 @@ class LocalOrDistributedWorkerBase(WorkerBase):
         """ Get the worker input from the broadcasted tensor dict. """
         assert self.do_metadata_broadcast
         assert not self.is_driver_worker
-        broadcast_data = broadcast_tensor_dict(src=0)
+        broadcast_data = None
         if not broadcast_data:
             return None
 
@@ -277,7 +277,7 @@ class LocalOrDistributedWorkerBase(WorkerBase):
             broadcast_data = worker_input.as_broadcastable_tensor_dict()
             broadcast_data.update(model_input.as_broadcastable_tensor_dict())
             broadcast_data.update(kwargs)
-            broadcast_tensor_dict(broadcast_data, src=0)
+            # broadcast_tensor_dict(broadcast_data, src=0)
 
         if execute_model_req.async_callback:
             model_input = dataclasses.replace(  # type: ignore
@@ -296,13 +296,6 @@ class LocalOrDistributedWorkerBase(WorkerBase):
         """
         if self.is_driver_worker:
             if execute_model_req is None:
-                if self.do_metadata_broadcast:
-                    # This signals that there's no more requests to process for
-                    # now. All workers are running infinite loop with
-                    # broadcast_tensor_dict, and it stops the loop when the
-                    # driver broadcasts an empty input. Send an empty input to
-                    # notify all other workers to stop their execution loop.
-                    broadcast_tensor_dict({}, src=0)
                 return None
             return self._get_driver_input_and_broadcast(execute_model_req)
         else:
@@ -331,14 +324,6 @@ class LocalOrDistributedWorkerBase(WorkerBase):
 
         intermediate_tensors = None
         orig_model_execute_time = 0.0
-        if not get_pp_group().is_first_rank:
-            intermediate_tensors = IntermediateTensors(
-                get_pp_group().recv_tensor_dict(
-                    all_gather_group=get_tp_group()))
-            if (self.observability_config is not None
-                    and self.observability_config.collect_model_execute_time):
-                orig_model_execute_time = intermediate_tensors.tensors.get(
-                    "model_execute_time", torch.tensor(0)).item()
 
         output = self.model_runner.execute_model(
             model_input=model_input,
@@ -350,15 +335,6 @@ class LocalOrDistributedWorkerBase(WorkerBase):
         )
 
         model_execute_time = time.perf_counter() - start_time
-        if not get_pp_group().is_last_rank:
-            # output is IntermediateTensors
-            if (self.observability_config is not None
-                    and self.observability_config.collect_model_execute_time):
-                output.tensors["model_execute_time"] = torch.tensor(
-                    model_execute_time + orig_model_execute_time)
-            get_pp_group().send_tensor_dict(output.tensors,
-                                            all_gather_group=get_tp_group())
-            return [None]
         if (self.observability_config is not None
                 and self.observability_config.collect_model_execute_time
                 and output is not None):
