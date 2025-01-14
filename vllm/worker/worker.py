@@ -8,10 +8,10 @@ import torch.distributed
 
 import vllm.envs as envs
 from vllm.config import VllmConfig
-from vllm.distributed import (ensure_kv_transfer_initialized,
-                              ensure_model_parallel_initialized,
-                              init_distributed_environment,
-                              set_custom_all_reduce)
+# from vllm.distributed import (ensure_kv_transfer_initialized,
+#                               ensure_model_parallel_initialized,
+#                               init_distributed_environment,
+#                               set_custom_all_reduce)
 from vllm.logger import init_logger
 from vllm.lora.request import LoRARequest
 from vllm.model_executor import set_random_seed
@@ -453,14 +453,14 @@ def init_worker_distributed_environment(
 ) -> None:
     """Initialize the distributed environment."""
     parallel_config = vllm_config.parallel_config
-    set_custom_all_reduce(not parallel_config.disable_custom_all_reduce)
-
-    init_distributed_environment(parallel_config.world_size, rank,
-                                 distributed_init_method, local_rank)
-    ensure_model_parallel_initialized(parallel_config.tensor_parallel_size,
-                                      parallel_config.pipeline_parallel_size)
-
-    ensure_kv_transfer_initialized(vllm_config)
+    # set_custom_all_reduce(not parallel_config.disable_custom_all_reduce)
+    #
+    # init_distributed_environment(parallel_config.world_size, rank,
+    #                              distributed_init_method, local_rank)
+    # ensure_model_parallel_initialized(parallel_config.tensor_parallel_size,
+    #                                   parallel_config.pipeline_parallel_size)
+    #
+    # ensure_kv_transfer_initialized(vllm_config)
 
 
 def _check_if_gpu_supports_dtype(torch_dtype: torch.dtype):
