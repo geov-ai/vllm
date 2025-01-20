@@ -287,6 +287,7 @@ class Worker(LocalOrDistributedWorkerBase):
         ]
 
     def _warm_up_model(self) -> None:
+        print('\n\n' + '=' * 10 + f'WARMUP enforce_eager={self.model_config.enforce_eager}\n\n')
         if not self.model_config.enforce_eager:
             self.model_runner.capture_model(self.gpu_cache)
         # Reset the seed to ensure that the random state is not affected by
