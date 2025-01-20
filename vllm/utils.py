@@ -762,6 +762,7 @@ def async_tensor_h2d(
     target_device: Union[str, torch.device],
     pin_memory: bool,
 ) -> torch.Tensor:
+    assert torch.cuda.current_device() == target_device
     """Asynchronously create a tensor and copy it from host to device."""
     t = torch.tensor(data, dtype=dtype, pin_memory=pin_memory, device="cpu")
     return t.to(device=target_device, non_blocking=True)
