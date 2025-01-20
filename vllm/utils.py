@@ -767,8 +767,9 @@ def async_tensor_h2d(
     assert torch.device(torch.cuda.current_device()) == target_device, \
         f'{type(target_device)} {repr(target_device)} != {repr(torch.cuda.current_device())}'
     """Asynchronously create a tensor and copy it from host to device."""
-    t = torch.tensor(data, dtype=dtype, pin_memory=pin_memory, device="cpu")
-    return t.to(device=target_device, non_blocking=True)
+    # t = torch.tensor(data, dtype=dtype, pin_memory=pin_memory, device="cpu")
+    # return t.to(device=target_device, non_blocking=True)
+    return torch.tensor(data, dtype=dtype, device=target_device)
 
 
 def get_dtype_size(dtype: torch.dtype) -> int:
